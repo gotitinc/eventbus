@@ -1,0 +1,31 @@
+version: '3'
+services:
+  eventbus:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: eventbus
+    environment:
+        - REDIS_URL=redis://redis
+        - PORT=80
+    ports:
+      - '80:80'
+    restart: always
+    networks:
+      - app-network
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    networks:
+      - app-network
+    expose:
+      - 6379
+
+# Docker networks
+networks:
+  app-network:
+    driver: bridge
