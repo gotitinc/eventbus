@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/gotitinc/eventbus/main/eventbus-logo-transparent.svg" alt="eventbus logo" width="150" height="150">
 </p>
 
-<h3 align="center">EventBus</h3>
+# EventBus
 
 [![Build Status](https://travis-ci.org/gotitinc/eventbus.svg?branch=main)](https://travis-ci.org/gotitinc/eventbus)
 [![Coverage Status](https://coveralls.io/repos/github/gotitinc/eventbus/badge.svg?branch=main)](https://coveralls.io/github/gotitinc/eventbus?branch=main)
