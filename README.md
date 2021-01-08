@@ -1,4 +1,10 @@
-# EventBus
+<p align="center">
+  <img src="https://raw.githubusercontent.com/gotitinc/eventbus/main/origin/eventbus-logo-trasparent.svg" alt="eventbus logo" width="150" height="150">
+</p>
+
+<h3 align="center">EventBus</h3>
+
+[![Build Status](https://travis-ci.org/gotitinc/eventbus.svg?branch=main)](https://travis-ci.org/gotitinc/eventbus)
 
 Eventbus is a scalable and Highly Available Event Bus Service.
 

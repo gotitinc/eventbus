@@ -8,6 +8,6 @@ before_script:
 env:
   - MIX_ENV=test
 script:
-  - mix coveralls --umbrella --include remote
+  - mix coveralls.travis --umbrella --include remote
 services:
   - redis-server
