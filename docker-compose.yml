@@ -7,9 +7,9 @@ services:
     container_name: eventbus
     environment:
         - REDIS_URL=redis://redis
-        - PORT=80
+        - PORT=4000
     ports:
-      - '80:80'
+      - '80:4000'
     restart: always
     networks:
       - app-network

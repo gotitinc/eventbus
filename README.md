@@ -47,7 +47,7 @@ and the following optional parameters:
 Example:
 
 ```
-$ curl -XPOST -H 'Content-Type: application/json' --data-binary '{"topic": "router", "key": "123", "url": "http://httpbin.org/post", "payload": "hello"}' http://event/api/produce
+$ curl -XPOST -H 'Content-Type: application/json' --data-binary '{"topic": "router", "key": "123", "url": "http://httpbin.org/post", "payload": "hello"}' http://localhost/api/produce
 ```
 
 **Produce Delayed**
@@ -73,7 +73,7 @@ and the following optional parameters:
 Example:
 
 ```
-$ curl -XPOST -H 'Content-Type: application/json' --data-binary '{"topic": "router", "key": "123", "url": "http://httpbin.org/post", "payload": "hello", "timeout": 60}' http://event/api/produce_delayed
+$ curl -XPOST -H 'Content-Type: application/json' --data-binary '{"topic": "router", "key": "123", "url": "http://httpbin.org/post", "payload": "hello", "timeout": 60}' http://localhost/api/produce_delayed
 ```
 
 ## Installation
