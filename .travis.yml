@@ -5,6 +5,7 @@ otp_release:
 sudo: false
 before_script:
   - mix deps.get
+  - mix deps.update certifi
 env:
   - MIX_ENV=test
 script:
