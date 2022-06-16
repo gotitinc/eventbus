@@ -4,7 +4,7 @@ defmodule Eventbus.PartitionManager do
   """
 
   use GenServer
-  alias Eventbus.{TopicSupervisor, Tracker}
+  alias Eventbus.{TopicSupervisor, Tracker, Utils, ConfigStore}
   require Logger
 
   @topic "eventbus"
@@ -58,7 +58,7 @@ defmodule Eventbus.PartitionManager do
       tracker: Keyword.get(params, :tracker, Tracker),
       topic_supervisor: Keyword.get(params, :topic_supervisor, TopicSupervisor),
       start_delay: start_delay,
-      topics_spec: Application.get_env(:eventbus, :topics, [])
+      topics_spec: ConfigStore.get_topics_spec()
     }}
   end
 

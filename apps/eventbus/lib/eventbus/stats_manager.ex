@@ -3,7 +3,8 @@ defmodule Eventbus.StatsManager do
   Manages multi-node services for counters services
   """
   use GenServer
-  alias Eventbus.{Tracker, PartitionConsumer, Queue, PriorityQueue}
+  alias Eventbus.{Tracker, PartitionConsumer, Queue, PriorityQueue,
+        ConfigStore}
 
   @topic "stats"
 
@@ -147,13 +148,10 @@ defmodule Eventbus.StatsManager do
   end
 
   def get_partition_count_for_topic(topic, fun) do
-    Application.get_env(:eventbus, :topics)
-    |> Enum.filter(fn [topic: t, partition_count: _] -> t == topic end)
+    ConfigStore.get_topic_count(topic)
     |> case do
-      [[topic: ^topic, partition_count: partition_count]] ->
-        fun.(partition_count)
-      _ ->
-        %{error: "invalid topic"}
+      nil -> %{error: "invalid topic"}
+      partition_count -> fun.(partition_count)
     end
   end
 end

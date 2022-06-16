@@ -2,7 +2,8 @@ defmodule EventbusTest do
   use ExUnit.Case, async: false
 
   alias Eventbus.{PartitionManager, StatsManager, PartitionConsumer,
-                  ClusterManager, TopicSupervisor, Tracker, JobHttpMock}
+                  ClusterManager, TopicSupervisor, Tracker, JobHttpMock,
+                  ConfigStore}
 
   def wait_if(alive, pid) do
     if (alive == :alive) == Process.alive?(pid) do
@@ -19,6 +20,10 @@ defmodule EventbusTest do
   end
 
   setup do
+    ConfigStore.init()
+    Application.get_env(:eventbus, :topics, [])
+    |> ConfigStore.put_topics_spec()
+    
     {:ok, topic_supervisor} = TopicSupervisor.start_link(TopicSupervisor.name("router"), [topic: "router", partition_count: 1])
     {:ok, topic_supervisor2} = TopicSupervisor.start_link(TopicSupervisor.name("_other"), [topic: "_other", partition_count: 1])
     [ok: cluster_manager, ok: tracker, ok: stats_manager, ok: partition_manager] = Eventbus.Application.start_managers()
@@ -112,7 +117,7 @@ defmodule EventbusTest do
   end
 
   test "partition_counter returns configured values" do
-    Application.get_env(:eventbus, :topics, [])
+    ConfigStore.get_topics_spec()
     |> Enum.each(fn [topic: topic, partition_count: partition_count] ->
       assert Eventbus.partition_count(topic) == partition_count
     end)

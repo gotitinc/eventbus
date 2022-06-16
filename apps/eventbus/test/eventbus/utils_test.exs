@@ -22,4 +22,27 @@ defmodule Eventbus.UtilsTest do
     assert Utils.delay(now + 1000) > 0
     assert Utils.delay(now + 1000) <= 1000
   end
+
+  test "nil topics env returns nil" do
+    assert is_nil Utils.env_to_topics_spec(nil)
+  end
+
+  test "invalid topics env returns nil" do
+    topic_env = ~s({"router": 200})
+    assert is_nil Utils.env_to_topics_spec(topic_env)
+  end
+
+  test "one entry json topic returns topic spec" do
+    topic_env = ~s([{"router": 200}])
+    expected = [[topic: "router", partition_count: 200]]
+    assert Utils.env_to_topics_spec(topic_env) == expected
+  end
+
+  test "many entries json topics returns topic spec" do
+    topic_env = ~s([{"router": 200}, {"_other": 100}])
+    expected = [[topic: "router", partition_count: 200],
+                [topic: "_other", partition_count: 100]]
+    assert Utils.env_to_topics_spec(topic_env) == expected
+  end
+
 end

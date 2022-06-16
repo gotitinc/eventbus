@@ -1,7 +1,7 @@
 defmodule Eventbus.TestPartitionManager do
   use ExUnit.Case
 
-  alias Eventbus.PartitionManager
+  alias Eventbus.{PartitionManager, ConfigStore}
 
   @topic "eventbus"
 
@@ -31,6 +31,13 @@ defmodule Eventbus.TestPartitionManager do
     end
   end
 
+  setup do
+    ConfigStore.init()
+    Application.get_env(:eventbus, :topics, [])
+    |> ConfigStore.put_topics_spec()
+    {:ok, %{}}
+  end
+
   test "partition_manager is initialized" do
     {:ok, pid} = PartitionManager.start_link(Eventbus.PartitionManager, [])
     assert Process.alive?(pid)
@@ -39,7 +46,7 @@ defmodule Eventbus.TestPartitionManager do
     assert state.tracker == Eventbus.Tracker
     assert state.topic_supervisor == Eventbus.TopicSupervisor
     assert state.start_delay == Application.get_env(:eventbus, :start_delay)
-    assert state.topics_spec == Application.get_env(:eventbus, :topics)
+    assert state.topics_spec == ConfigStore.get_topics_spec()
   end
 
   test "enable registers with tracker" do
@@ -105,7 +112,7 @@ defmodule Eventbus.TestPartitionManager do
     state = :sys.get_state(pid)
     assert state.status == :started
 
-    Application.get_env(:eventbus, :topics, [])
+    ConfigStore.get_topics_spec()
     |> Enum.reverse()
     |> Enum.each(fn [topic: topic, partition_count: partition_count] ->
       Enum.each(partition_count-1..0, fn partition ->
@@ -113,4 +120,5 @@ defmodule Eventbus.TestPartitionManager do
       end)
     end)
   end
+
 end

@@ -5,7 +5,7 @@ defmodule Eventbus.Application do
   use Application
 
   alias Eventbus.{TopicSupervisor, PartitionManager, StatsManager,
-        ClusterManager, Tracker, Redix}
+        ClusterManager, Tracker, Redix, Utils, ConfigStore}
 
   defmacro test?() do
     Mix.env() == :test
@@ -14,11 +14,11 @@ defmodule Eventbus.Application do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    # redis_conf = Application.get_env(:eventbus, :redis_url)
     redis_conf = Application.fetch_env!(:eventbus, :redis_url)
     environment = System.get_env("ENVIRONMENT") || "default"
     redis_url = System.get_env("REDIS_URL") || Keyword.get(redis_conf, String.to_atom(environment))
-    topics_spec = Application.get_env(:eventbus, :topics)
+    topics_spec = (System.get_env("TOPICS") |> Utils.env_to_topics_spec)
+        || Application.get_env(:eventbus, :topics, [])
 
     Code.ensure_loaded(Eventbus.JobHttpPost)
     Code.ensure_loaded(Eventbus.JobHttpMock)
@@ -34,6 +34,8 @@ defmodule Eventbus.Application do
     ++ if test?() do
       []
     else
+      ConfigStore.init()
+      ConfigStore.put_topics_spec(topics_spec)
       Enum.map(topics_spec, fn [topic: topic, partition_count: _] = topic_spec ->
         name = TopicSupervisor.name(topic)
         Supervisor.child_spec({TopicSupervisor, [name, topic_spec]},

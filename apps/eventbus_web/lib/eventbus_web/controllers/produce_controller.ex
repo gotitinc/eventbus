@@ -125,6 +125,8 @@ defmodule EventbusWeb.ProduceController do
     case resp do
       {:ok, _} ->
         :ok
+      {:bad_request, error} ->
+        {:error, 400, inspect(error)}
       error ->
         {:error, 500, inspect(error)}
     end

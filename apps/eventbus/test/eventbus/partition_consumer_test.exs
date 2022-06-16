@@ -1,7 +1,7 @@
 defmodule Eventbus.PartitionConsumerTest do
   use ExUnit.Case
 
-  alias Eventbus.{PartitionConsumer, JobSend, Queue, Hash}
+  alias Eventbus.{PartitionConsumer, JobSend, Queue, Hash, ConfigStore}
 
   setup do
     topic = "topic"
@@ -11,6 +11,10 @@ defmodule Eventbus.PartitionConsumerTest do
     {:ok, hash} = Hash.init((PartitionConsumer.name_string(topic, partition)))
     :ok = Hash.reset(hash)
     :ok = Queue.reset(queue)
+
+    ConfigStore.init()
+    Application.get_env(:eventbus, :topics, [])
+    |> ConfigStore.put_topics_spec()
 
     {:ok, %{topic: topic, partition: partition, queue: queue, hash: hash}}
   end
@@ -77,9 +81,10 @@ defmodule Eventbus.PartitionConsumerTest do
   end
 
   test "partition_count returns the correct number of partitions" do
-    Application.get_env(:eventbus, :topics, [])
+    ConfigStore.get_topics_spec()
     |> Enum.each(fn [topic: topic, partition_count: partition_count] ->
       assert PartitionConsumer.partition_count(topic) == partition_count
     end)
   end
+
 end

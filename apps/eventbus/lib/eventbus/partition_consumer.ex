@@ -4,7 +4,7 @@ defmodule Eventbus.PartitionConsumer do
   """
   use GenServer
 
-  alias Eventbus.{PartitionTimer, Job, Utils, Queue, Hash}
+  alias Eventbus.{PartitionTimer, Job, Utils, Queue, Hash, ConfigStore}
   alias Phoenix.PubSub
 
   require Logger
@@ -140,14 +140,7 @@ defmodule Eventbus.PartitionConsumer do
   end
 
   def partition_count(topic) do
-    Application.get_env(:eventbus, :topics)
-    |> Enum.reduce(0, fn topic_spec, res ->
-      if Keyword.get(topic_spec, :topic) == topic do
-        Keyword.get(topic_spec, :partition_count)
-      else
-        res
-      end
-    end)
+    ConfigStore.get_topic_count(topic) || 0
   end
 
 end

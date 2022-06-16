@@ -3,39 +3,45 @@ defmodule Eventbus do
   Eventbus Application producs and consumes Kafka messages
   """
   alias Eventbus.{PartitionConsumer, PartitionTimer, StatsManager,
-                  JobHttpPost, Utils, Redix}
+                  JobHttpPost, Utils, Redix, ConfigStore}
 
   def produce(topic, key, params) do
-    valid_topic = if partition_count(topic) == 0, do: "_other", else: topic
-    partition = PartitionConsumer.topic_hash(key, valid_topic)
-    Stats.increment(:counter, :produce_in, valid_topic, partition)
+    with {:ok, valid_topic} <- ConfigStore.validate_topic(topic) do
+      partition = PartitionConsumer.topic_hash(key, valid_topic)
+      Stats.increment(:counter, :produce_in, valid_topic, partition)
 
-    url = Keyword.get(params, :url)
-    payload = Keyword.get(params, :payload)
-    job_module = Keyword.get(params, :job_module, JobHttpPost)
-    max_retry = Keyword.get(params, :max_retry)
-    timeout = Keyword.get(params, :timeout)
+      url = Keyword.get(params, :url)
+      payload = Keyword.get(params, :payload)
+      job_module = Keyword.get(params, :job_module, JobHttpPost)
+      max_retry = Keyword.get(params, :max_retry)
+      timeout = Keyword.get(params, :timeout)
 
-    job = job_module.init(payload, url, valid_topic, partition, max_retry, timeout)
-    PartitionConsumer.post_job(valid_topic, partition, job)
-    {:ok, :sent}
+      job = job_module.init(payload, url, valid_topic, partition, max_retry, timeout)
+      PartitionConsumer.post_job(valid_topic, partition, job)
+      {:ok, :sent}
+    else
+      _ -> {:bad_request, "invalid topic"}
+    end
   end
 
   def produce_delayed(topic, key, params) do
-    valid_topic = if partition_count(topic) == 0, do: "_other", else: topic
-    partition = PartitionConsumer.topic_hash(key, valid_topic)
-    Stats.increment(:counter, :produce_delay_in, valid_topic, partition)
+    with {:ok, valid_topic} <- ConfigStore.validate_topic(topic) do
+      partition = PartitionConsumer.topic_hash(key, valid_topic)
+      Stats.increment(:counter, :produce_delay_in, valid_topic, partition)
 
-    url = Keyword.get(params, :url)
-    payload = Keyword.get(params, :payload)
-    job_module = Keyword.get(params, :job_module, JobHttpPost)
-    delay = Keyword.get(params, :delay, 0)
-    max_retry = Keyword.get(params, :max_retry)
-    timeout = Keyword.get(params, :timeout)
+      url = Keyword.get(params, :url)
+      payload = Keyword.get(params, :payload)
+      job_module = Keyword.get(params, :job_module, JobHttpPost)
+      delay = Keyword.get(params, :delay, 0)
+      max_retry = Keyword.get(params, :max_retry)
+      timeout = Keyword.get(params, :timeout)
 
-    job = job_module.init(payload, url, valid_topic, partition, max_retry, timeout)
-    PartitionTimer.post_delayed_job(valid_topic, partition, job, Utils.now() + delay)
-    {:ok, :sent}
+      job = job_module.init(payload, url, valid_topic, partition, max_retry, timeout)
+      PartitionTimer.post_delayed_job(valid_topic, partition, job, Utils.now() + delay)
+      {:ok, :sent}
+    else
+      _ -> {:bad_request, "invalid topic"}
+    end
   end
 
   def partition_count(topic) do
@@ -43,7 +49,7 @@ defmodule Eventbus do
   end
 
   def reset_events() do
-    Application.get_env(:eventbus, :topics)
+    ConfigStore.get_topics_spec()
     |> Enum.each(fn topic_spec ->
       topic =  Keyword.get(topic_spec, :topic)
       partition_count = Keyword.get(topic_spec, :partition_count)

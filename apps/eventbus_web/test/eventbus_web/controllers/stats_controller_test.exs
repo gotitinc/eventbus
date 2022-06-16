@@ -6,10 +6,10 @@ defmodule EventbusWeb.StatsControllerTest do
     assert json_response(conn, 400) == %{"error" => "unknown counter"}
   end
 
-  test "GET /stats/counter invalid topic", %{conn: conn} do
-    conn = get conn, "/stats/counter/produce_in/foo"
-    assert json_response(conn, 400) == %{"error" => "invalid topic"}
-  end
+  # test "GET /stats/counter invalid topic", %{conn: conn} do
+  #   conn = get conn, "/stats/counter/produce_in/foo"
+  #   assert json_response(conn, 400) == %{"error" => "invalid topic"}
+  # end
 
   # test "GET /stats/counter gets stats", %{conn: conn} do
   #   conn = get conn, "/stats/counter/produce_in/default"
