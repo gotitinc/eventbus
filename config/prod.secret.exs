@@ -11,6 +11,7 @@ secret_key_base =
 config :eventbus_web, EventbusWeb.Endpoint,
   http: [
     port: String.to_integer(System.get_env("PORT") || "4000"),
+    protocol_options: [idle_timeout: 70_000],
     transport_options: [socket_opts: [:inet6]]
   ],
   secret_key_base: secret_key_base
